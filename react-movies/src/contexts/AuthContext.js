@@ -1,27 +1,66 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import React, { useState, createContext } from "react";
+import { login, signup } from "../api/tmdb-api";
 
-const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+const AuthContextProvider = (props) => {
+  const existingToken = localStorage.getItem("token");
+  const [isAuthenticated, setIsAuthenticated] = useState(!!existingToken);
+  const [authToken, setAuthToken] = useState(existingToken);
+  const [userName, setUserName] = useState("");
+  const [loginErr, setLoginErr] = useState(null);
+  const [authErr, setAuthErr] = useState(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
+  const setToken = (data) => {
+    localStorage.setItem("token", data);
+    setAuthToken(data);
+  };
 
-    return () => unsubscribe();
-  }, []);
+  const authenticate = async (username, password) => {
+    const result = await login(username, password);
+    if (result.token) {
+      setToken(result.token);
+      setIsAuthenticated(true);
+      setUserName(username);
+    } else {
+      setLoginErr(result.msg);
+    }
+  };
 
-  const logOut = () => signOut(auth);
+  const register = async (username, password) => {
+    const result = await signup(username, password);
+    if (!result.success) {
+      setAuthErr(result.msg);
+      return false;
+    }
+    if (result.code === 201) {
+      return true;
+    }
+  };
+
+  const signout = () => {
+    setIsAuthenticated(false);
+    setAuthToken(null);
+    setUserName("");
+    localStorage.removeItem("token");
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, logOut }}>
-      {children}
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        authenticate,
+        register,
+        signout,
+        userName,
+        authErr,
+        loginErr,
+        authToken
+      }}
+    >
+      {props.children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default AuthContextProvider;

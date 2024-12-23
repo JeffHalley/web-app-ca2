@@ -1,65 +1,43 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
-import { auth } from "../../firebase";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
-import "./SignIn.css"; // Import the CSS file
+import React, { useContext, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { AuthContext } from '../../contexts/authContext';
+import { Link } from "react-router-dom";
 
-const SignIn = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate hook
+const LoginPage = props => {
+    const context = useContext(AuthContext);
 
-  const signIn = (e) => {
-    e.preventDefault();
+    const [userName, setUserName] = useState("");
+    const [password, setPassword] = useState("");
 
-    // Firebase authentication logic
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log(userCredential); // You can remove this line in production
-        navigate("/"); // Navigate to the home page ("/") after successful login
-      })
-      .catch((error) => {
-        console.log(error.message); // Log error message if login fails
-      });
-  };
+    const login = () => {
+        context.authenticate(userName, password);
+    };
 
-  const goToSignUp = () => {
-    navigate("/signup"); // Navigate to the signup page
-  };
+    let location = useLocation();
 
-  return (
-    <div className="sign-in-container">
-      <form onSubmit={signIn} className="form">
-        <h1>Log In to your Account</h1>
+    // Set 'from' to path where browser is redirected after a successful login - either / or the protected path user requested
+    const { from } = location.state ? { from: location.state.from.pathname } : { from: "/" };
 
-        <div className="input-group">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        
-        <div className="input-group">
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+    if (context.isAuthenticated === true) {
+        return <Navigate to={from} />;
+    }
 
-        <button type="submit" className="submit-btn">Log In</button>
-        
-        <div className="signup-link">
-          <button type="button" onClick={goToSignUp}>Don't have an account? Sign Up</button>
-        </div>
-      </form>
-    </div>
-  );
+    return (
+        <>
+            <h2>Login page</h2>
+            <p>You must log in to view the protected pages </p>
+            <input id="username" placeholder="user name" onChange={e => {
+                setUserName(e.target.value);
+            }}></input><br />
+            <input id="password" type="password" placeholder="password" onChange={e => {
+                setPassword(e.target.value);
+            }}></input><br />
+            {/* Login web form  */}
+            <button onClick={login}>Log in</button>
+            <p>Not Registered?
+                <Link to="/signup">Sign Up!</Link></p>
+        </>
+    );
 };
 
-export default SignIn;
+export default LoginPage;

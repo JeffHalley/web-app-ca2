@@ -1,62 +1,45 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
-import { auth } from "../../firebase";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import React, { useContext, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from '../../contexts/authContext';
 
-const SignUp = () => {
-  const [email, setEmail] = useState("");
+const SignUpPage = props => {
+  const context = useContext(AuthContext)
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const [passwordAgain, setPasswordAgain] = useState("");
+  const [registered, setRegistered] = useState(false);
 
-  const signUp = (e) => {
-    e.preventDefault();
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log(userCredential); // You can remove this line in production
-        navigate("/"); // Navigate to the home page after successful signup
-      })
-      .catch((error) => {
-        console.log(error.message); // Log error message if signup fails
-      });
-  };
+  const register = () => {
+    let passwordRegEx = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    const validPassword = passwordRegEx.test(password);
 
-  const goToSignIn = () => {
-    navigate("/signin"); // Navigate to the sign-in page
-  };
+    if (validPassword && password === passwordAgain) {
+      context.register(userName, password);
+      setRegistered(true);
+    }
+  }
+
+  if (registered === true) {
+    return <Navigate to="/login" />;
+  }
 
   return (
-    <div className="sign-in-container">
-      <form onSubmit={signUp} className="form">
-        <h1>Create Account</h1>
-        <div className="input-group">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Sign Up</button>
-      </form>
-
-      {/* Button to navigate to the Sign In page */}
-      <div className="signup-link">
-      <button onClick={goToSignIn}>
-        Already have an account? Sign In
-      </button>
-      </div>
-    </div>
+    <>
+      <h2>SignUp page</h2>
+      <p>You must register a username and password to log in </p>
+      <input value={userName} placeholder="user name" onChange={e => {
+        setUserName(e.target.value);
+      }}></input><br />
+      <input value={password} type="password" placeholder="password" onChange={e => {
+        setPassword(e.target.value);
+      }}></input><br />
+      <input value={passwordAgain} type="password" placeholder="password again" onChange={e => {
+        setPasswordAgain(e.target.value);
+      }}></input><br />
+      {/* Login web form  */}
+      <button onClick={register}>Register</button>
+    </>
   );
 };
 
-export default SignUp;
+export default SignUpPage;
