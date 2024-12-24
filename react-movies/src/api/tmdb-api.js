@@ -1,3 +1,29 @@
+export const login = async (username, password) => {
+  const response = await fetch('http://localhost:8080/api/users', {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({ username, password })
+  });
+  const data = await response.json();
+  return data;
+};
+
+export const signup = async (username, password) => {
+  const response = await fetch('http://localhost:8080/api/users?action=register', {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({ username, password })
+  });
+  const data = await response.json();
+  return data;
+};
+
+
+
 export const getMovies = () => {
   return fetch(
     `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.REACT_APP_TMDB_KEY}&language=en-US&include_adult=false&include_video=false&page=1`

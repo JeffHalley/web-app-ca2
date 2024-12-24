@@ -11,6 +11,9 @@ const AuthContextProvider = (props) => {
   const [loginErr, setLoginErr] = useState(null);
   const [authErr, setAuthErr] = useState(null);
 
+ 
+  
+
   const setToken = (data) => {
     localStorage.setItem("token", data);
     setAuthToken(data);
