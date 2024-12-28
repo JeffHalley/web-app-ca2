@@ -3,9 +3,10 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Navigate, Routes, useNavigate } from "react-router-dom";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoutes from "./components/ProtectedRoute";
+import ReactDOM from "react-dom/client";
 
-import SignIn from './components/auth/signIn';
+import LoginPage from './components/auth/signIn';
 import SignUp from './components/auth/signUp';
 
 import HomePage from "./pages/homePage";
@@ -19,7 +20,10 @@ import AddMovieReviewPage from "./pages/addMovieReviewPage";
 
 import SiteHeader from "./components/siteHeader";
 import MoviesContextProvider from "./contexts/moviesContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import AuthContextProvider from "./contexts/authContext";
+
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,21 +38,28 @@ const queryClient = new QueryClient({
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-      <Route path="/movies/favorites" element={<ProtectedRoute><FavoriteMoviesPage /></ProtectedRoute>} />
-      <Route path="/reviews/:id" element={<ProtectedRoute><MovieReviewPage /></ProtectedRoute>} />
-      <Route path="/movies/:id" element={<ProtectedRoute><MoviePage /></ProtectedRoute>} />
-      <Route path="/movies/upcoming" element={<ProtectedRoute><UpcomingPage /></ProtectedRoute>} />
-      <Route path="/movies/popular" element={<ProtectedRoute><PopularPage /></ProtectedRoute>} />
-      <Route path="/movies/now_playing" element={<ProtectedRoute><NowPlayingPage /></ProtectedRoute>} />
-      <Route path="/reviews/form" element={<ProtectedRoute><AddMovieReviewPage /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+                
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route element={<ProtectedRoutes />}>
+                <Route path="/" element={<HomePage />} />
+                  <Route path="/movies/favorites" element={<FavoriteMoviesPage />} />
+                  <Route path="/reviews/:id" element={<MovieReviewPage />} />
+                  <Route path="/movies/:id" element={<MoviePage />} />
+                  <Route path="/movies/upcoming" element={<UpcomingPage />} />
+                  <Route path="/movies/popular" element={<PopularPage />} />
+                  <Route path="/movies/now_playing" element={<NowPlayingPage />} />
+                  <Route path="/reviews/form" element={<AddMovieReviewPage />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+    
 
   );
 };
+
+
+
 
 const App = () => {
   const backgroundStyle = {
@@ -62,19 +73,26 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
+        <AuthContextProvider>
           <SiteHeader />
           <MoviesContextProvider>
             <div style={backgroundStyle}>
               <AppRoutes />
             </div>
           </MoviesContextProvider>
-        </AuthProvider>
+        </AuthContextProvider>
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
 
-const rootElement = createRoot(document.getElementById("root"));
-rootElement.render(<App />);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App /> {}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  </React.StrictMode>
+);
