@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Navigate, Routes, useNavigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Route, Navigate, Routes  } from "react-router-dom";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import ProtectedRoutes from "./components/ProtectedRoute";
@@ -54,6 +53,7 @@ const AppRoutes = () => {
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
     
+ 
 
   );
 };
